@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>NOVAPLAY | DASHBOARD</title>
+    <link rel="icon" type="image/webp" href="https://raw.githubusercontent.com/NovaplayGO/novaimg/main/novasplash.webp">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+    <style>
+        :root {
+            --primary: #e50914;
+            --primary-hover: #b91c1c;
+            --bg: #080a10;
+            --card-bg: #11151f;
+            --input-bg: #1a1f2e;
+            --text: #ffffff;
+            --text-muted: #9aa3b2;
+            --border: rgba(255,255,255,0.05);
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #ffbb00;
+            --nav-height: 70px;
+        }
+
+        * { box-sizing: border-box; outline: none; margin: 0; padding: 0; }
+        html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; overflow: hidden; -webkit-font-smoothing: antialiased; }
+
+        /* Navegación Premium */
+        .nova-nav { position: fixed; top: 0; width: 100%; z-index: 10000; background: rgba(0,0,0,0.7); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.05); transition: 0.3s; }
+        .nav-inner { max-width: 1400px; margin: auto; height: var(--nav-height); padding: 0 30px; display: flex; align-items: center; justify-content: space-between; }
+        .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: #fff; font-weight: 900; font-size: 22px; letter-spacing: -1px; }
+        .nav-brand img { width: 36px; height: 32px; border-radius: 8px; }
+
+        .nav-links { display: flex; gap: 15px; align-items: center; }
+        .nav-links a { color: #ccc; text-decoration: none; font-size: 14px; font-weight: 600; transition: 0.2s; padding: 10px 15px; border-radius: 10px; }
+        .nav-links a:hover { color: #fff; background: rgba(255,255,255,0.05); }
+
+        .btn-login-nav, .btn-logout {
+            background: var(--primary);
+            color: #fff !important;
+            font-weight: 800 !important;
+            box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3);
+            border: none;
+            cursor: pointer;
+            padding: 10px 20px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 14px;
+            display: none;
+            transition: 0.2s;
+        }
+        .btn-login-nav:hover { transform: scale(1.05); background: var(--primary-hover); }
+        .btn-logout { display: none; background: var(--error); box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3); }
+        .btn-logout:hover { transform: scale(1.05); filter: brightness(1.2); }
+
+        .nav-toggle { display: none; }
+
+        /* Botón de Mantenimiento Nav */
+        .btn-maint-nav {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 900;
+            cursor: pointer;
+            transition: 0.3s;
+            border: 1px solid rgba(255,255,255,0.1);
+            text-transform: uppercase;
+        }
+        .btn-maint-nav i { font-size: 14px; }
+        .btn-maint-nav.off { background: rgba(16, 185, 129, 0.1); color: var(--success); border-color: var(--success); }
+        .btn-maint-nav.on { background: var(--error); color: #fff; border-color: var(--error); box-shadow: 0 0 15px rgba(239,68,68,0.4); }
+        .btn-maint-nav:hover { transform: scale(1.05); filter: brightness(1.2); }
+
+        /* Dropdown de Administración Premium - BLINDAJE TOTAL V4 */
+        .admin-menu { position: relative; display: none; align-items: center; height: var(--nav-height); padding: 0 10px; }
+        .btn-admin { background: #fff; color: #000; font-weight: 900; border: none; cursor: pointer; padding: 10px 20px; border-radius: 12px; font-size: 13px; display: flex; align-items: center; gap: 10px; transition: 0.3s; position: relative; z-index: 10002; }
+        .btn-admin:hover { background: var(--primary); color: #fff; box-shadow: 0 0 20px rgba(229,9,20,0.4); }
+        .dropdown-content { position: absolute; top: 100%; right: 0; background: var(--card-bg); min-width: 280px; border-radius: 24px; border: 1px solid var(--border); overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 25px 60px rgba(0,0,0,0.9); z-index: 10001; margin-top: -10px; opacity: 0; visibility: hidden; transform: translateY(10px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); pointer-events: none; }
+        .admin-menu.active .dropdown-content { opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto; }
+        /* Desktop Hover Fallback */
+        @media (min-width: 901px) {
+            .admin-menu:hover .dropdown-content { opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto; }
+        }
+        .dropdown-content::before { content: ''; position: absolute; top: -50px; left: -50px; right: -50px; height: 100px; background: transparent; z-index: -1; }
+        .dropdown-content a { padding: 16px 25px; color: #fff !important; text-decoration: none !important; font-size: 13px !important; font-weight: 700 !important; border-bottom: 1px solid rgba(255,255,255,0.03); transition: 0.2s; display: flex; align-items: center; gap: 15px; }
+        .dropdown-content a i { width: 20px; color: var(--primary); text-align: center; font-size: 16px; }
+        .dropdown-content a:hover { background: rgba(255,255,255,0.05); padding-left: 30px; color: var(--primary) !important; }
+        .dropdown-content .logout-link { color: var(--error) !important; border-bottom: none; }
+        .dropdown-content .logout-link i { color: var(--error); }
+
+        /* Contenedor Principal */
+        main { height: calc(100% - var(--nav-height)); margin-top: var(--nav-height); overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
+        .app-container { width: 100%; max-width: 1300px; padding: 40px 25px; display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 25px; align-items: stretch; }
+
+        /* Cards */
+        .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 28px; padding: 40px; box-shadow: 0 15px 40px rgba(0,0,0,0.4); display: flex; flex-direction: column; align-items: center; text-align: center; transition: 0.3s; position: relative; overflow: hidden; min-height: 520px; justify-content: space-between; }
+        .card:hover { transform: translateY(-5px); border-color: var(--primary); }
+        .card h2 { font-size: 18px; font-weight: 900; margin-bottom: 25px; display: flex; align-items: center; justify-content: center; gap: 12px; text-transform: uppercase; color: var(--text-muted); width: 100%; }
+        .card h2 i { font-size: 20px; color: var(--primary); }
+
+        /* Resúmenes */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; margin-bottom: 30px; }
+        .stat-box { background: rgba(255,255,255,0.03); padding: 25px 15px; border-radius: 24px; border: 1px solid var(--border); text-align: center; flex: 1; }
+        .stat-box .value { display: block; font-size: 32px; font-weight: 900; color: #fff; line-height: 1; }
+        .stat-box .label { font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-top: 8px; letter-spacing: 1px; }
+
+        /* Info Rows */
+        .info-container { width: 100%; margin-bottom: 30px; }
+        .version-row { display: flex; justify-content: center; gap: 15px; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 14px; width: 100%; align-items: center; }
+        .version-row span:first-child { color: var(--text-muted); font-weight: 600; }
+        .version-row .tag { font-weight: 900; color: var(--warning); background: rgba(255,187,0,0.1); padding: 4px 10px; border-radius: 8px; font-size: 12px; }
+        .version-row .val { font-weight: 700; color: #fff; }
+
+        /* Lanzadores */
+        .btn-launch { width: 100%; padding: 18px; border-radius: 20px; background: #fff; color: #000; text-decoration: none; font-weight: 900; font-size: 13px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.3s; text-transform: uppercase; letter-spacing: 0.5px; }
+        .btn-launch:hover { background: var(--primary); color: #fff; transform: scale(1.02); }
+
+        /* Charts */
+        .chart-container { width: 100%; height: 280px; position: relative; margin-top: 15px; }
+        .card.wide { grid-column: 1 / -1; min-height: auto; }
+
+        .version-summary-list { width: 100%; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 20px; padding: 10px; background: rgba(255,255,255,0.02); border-radius: 15px; border: 1px solid var(--border); }
+        .v-item { padding: 6px 12px; border-radius: 10px; font-size: 10px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px; border: 1px solid rgba(255,255,255,0.05); }
+        .v-item b { color: var(--primary); font-size: 12px; }
+
+        /* Health Check Styles */
+        .health-list { width: 100%; text-align: left; }
+        .health-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        .health-item:last-child { border-bottom: none; }
+        .health-label { font-size: 13px; font-weight: 600; color: var(--text-muted); display: flex; align-items: center; gap: 10px; }
+        .health-status { font-size: 11px; font-weight: 900; text-transform: uppercase; padding: 4px 10px; border-radius: 8px; }
+        .status-ok { background: rgba(16,185,129,0.1); color: var(--success); }
+        .status-warn { background: rgba(255,187,0,0.1); color: var(--warning); }
+        .status-err { background: rgba(229,9,20,0.1); color: var(--primary); }
+
+        /* Live Counter Styles */
+        .live-counter-card { grid-column: 1 / -1; background: linear-gradient(135deg, #11151f 0%, #080a10 100%); border: 1px solid var(--border); border-radius: 30px; padding: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.6); }
+        .live-counter-card::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(229,9,20,0.05) 0%, transparent 70%); pointer-events: none; }
+        .live-value { font-size: 80px; font-weight: 900; color: #fff; line-height: 1; letter-spacing: -4px; text-shadow: 0 0 40px rgba(229,9,20,0.6); animation: pulse-glow 2s infinite; }
+        .live-label { font-size: 14px; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 4px; margin-top: 10px; display: flex; align-items: center; gap: 10px; }
+        .live-dot { width: 10px; height: 10px; background: var(--primary); border-radius: 50%; box-shadow: 0 0 15px var(--primary); animation: blink 1s infinite; }
+
+        @keyframes pulse-glow { 0%, 100% { text-shadow: 0 0 40px rgba(229,9,20,0.6); } 50% { text-shadow: 0 0 70px rgba(229,9,20,0.9); transform: scale(1.02); } }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        @media (max-width: 900px) {
+            .card.wide { grid-column: auto; }
+        }
+
+        /* Login */
+        #auth-view { position: fixed; inset: 0; background: var(--bg); z-index: 10001; display: flex; justify-content: center; align-items: center; }
+        .auth-card { width: 400px; padding: 50px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 35px; text-align: center; box-shadow: 0 30px 80px rgba(0,0,0,0.6); }
+        .auth-card input { width: 100%; padding: 16px; background: var(--bg); border: 1px solid var(--border); border-radius: 14px; color: #fff; margin-bottom: 15px; font-size: 15px; }
+        .status { margin-top: 15px; padding: 14px; border-radius: 12px; font-size: 13px; font-weight: 800; display: none; text-align: center; }
+        .status.error { background: rgba(239,68,68,0.1); color: var(--error); border: 1px solid var(--error); }
+
+        .form-group { text-align: left; margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-size: 11px; font-weight: 900; color: var(--text-muted); text-transform: uppercase; }
+
+        .btn-primary { background: var(--primary); color: #fff; border: none; cursor: pointer; transition: 0.2s; }
+
+        /* NovaModal Premium */
+        .nova-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 20000; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .nova-modal { background: var(--card-bg); border: 1px solid var(--border); border-radius: 30px; width: 100%; max-width: 450px; padding: 40px; box-shadow: 0 25px 60px rgba(0,0,0,0.6); text-align: center; animation: modal-in 0.3s ease-out; }
+        @keyframes modal-in { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .nova-modal h3 { font-size: 22px; font-weight: 900; margin-bottom: 15px; text-transform: uppercase; }
+        .nova-modal p { color: var(--text-muted); font-size: 15px; margin-bottom: 25px; line-height: 1.5; }
+        .nova-modal input { width: 100%; padding: 15px; background: var(--bg); border: 1px solid var(--border); border-radius: 14px; color: #fff; margin-bottom: 20px; font-size: 15px; }
+        .nova-modal-btns { display: flex; gap: 12px; }
+        .nova-modal-btn { flex: 1; padding: 15px; border-radius: 14px; border: 0; font-weight: 800; cursor: pointer; transition: 0.2s; }
+        .btn-confirm { background: var(--primary); color: #fff; }
+        .btn-cancel { background: #222; color: #fff; }
+        .nova-modal-btn:hover { transform: scale(1.03); }
+
+        .hidden { display: none !important; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+        footer { width: 100%; padding: 60px 20px; background: #000; border-top: 1px solid rgba(255,255,255,0.05); text-align: center; margin-top: auto; }
+        .footer-text { font-size: 13px; color: #444; line-height: 1.8; font-weight: 600; }
+
+        /* Responsividad Mejorada */
+        @media (max-width: 900px) {
+            html, body { height: auto !important; overflow-y: auto !important; }
+            .nav-inner { padding: 0 15px; }
+            .nav-toggle { display: flex; background: none; border: none; cursor: pointer; padding: 10px; flex-direction: column; gap: 5px; z-index: 10001; }
+            .nav-toggle span { display: block; width: 25px; height: 3px; background: #fff; transition: 0.3s; border-radius: 2px; }
+
+            .nav-links {
+                position: fixed; top: 0; right: -100%; width: 100%; height: 100vh;
+                background: rgba(8, 10, 16, 0.98); backdrop-filter: blur(20px);
+                flex-direction: column; justify-content: flex-start; align-items: center;
+                transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); gap: 15px; padding: 100px 40px 40px;
+                overflow-y: auto;
+            }
+            .nav-links.active { right: 0; }
+            .nav-links a { font-size: 18px; width: 100%; text-align: center; padding: 15px; border-radius: 15px; }
+
+            /* Botón Mantenimiento en móvil */
+            .btn-maint-nav { width: 100%; justify-content: center; padding: 18px; font-size: 14px; border-radius: 15px; }
+
+            /* Ajuste del botón PANEL en móvil */
+            .admin-menu { width: 100%; height: auto; justify-content: center; padding: 0; flex-direction: column; }
+            .admin-menu.active .dropdown-content { opacity: 1; visibility: visible; display: flex; }
+            .btn-admin { width: 100%; justify-content: center; padding: 18px; font-size: 16px; border-radius: 15px; }
+            .dropdown-content { position: relative; width: 100%; top: 0; margin-top: 10px; opacity: 0; visibility: hidden; display: none; transform: none; box-shadow: none; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); }
+            .dropdown-content a { padding: 15px; font-size: 14px !important; }
+
+            .nav-toggle.active span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+            .nav-toggle.active span:nth-child(2) { opacity: 0; }
+            .nav-toggle.active span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+            /* Dashboard Cards en móvil */
+            main { padding: 20px 10px; height: auto; overflow: visible; }
+            .app-container { grid-template-columns: 1fr; padding: 20px 10px; gap: 20px; }
+            .card { min-height: auto; padding: 30px 20px; }
+
+            .auth-card { width: 95%; padding: 30px 20px; border-radius: 25px; }
+
+            footer { padding: 40px 15px; margin-top: 40px; }
+            .footer-text { font-size: 11px; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="nova-nav">
+    <div class="nav-inner">
+        <a class="nav-brand" href="https://novaplaygo.github.io/">
+            <img src="https://raw.githubusercontent.com/NovaplayGO/novaimg/main/novasplash.webp">
+            NOVAPLAY | DASHBOARD
+        </a>
+
+        <button class="nav-toggle" id="navToggle" aria-label="Abrir menú">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <div class="nav-links" id="navLinks">
+            <a href="https://novaplaygo.github.io/" style="color: var(--primary); font-weight: 800;">INICIO</a>
+            <button id="nav-maint-btn" class="btn-maint-nav" onclick="confirmarToggleMantenimiento()">
+                <i class="fas fa-tools"></i> <span id="nav-maint-text">SISTEMA OK</span>
+            </button>
+            <button class="btn-login-nav" id="navLogin" onclick="UI_MostrarLogin()">INGRESAR</button>
+            <div class="admin-menu" id="adminMenu">
+                <button class="btn-admin"><i class="fas fa-user-shield"></i> PANEL</button>
+                <div class="dropdown-content">
+                    <a href="https://novaplaygo.github.io/Dashboard/"><i class="fas fa-chart-line"></i> Dashboard Central</a>
+                    <a href="https://novaplaygo.github.io/panel-canales/"><i class="fas fa-tv"></i> Admin. Canales</a>
+                    <a href="https://novaplaygo.github.io/NovaSecurity/"><i class="fas fa-shield-alt"></i> NovaSecurity</a>
+                    
+                    <a href="https://novaplaygo.github.io/novaimg/actualizar-icono/"><i class="fas fa-icons"></i> Gestión de Iconos</a>
+                    <a href="https://novaplaygo.github.io/novaimg/generador/"><i class="fas fa-magic"></i> Icon Studio</a>
+                    <a href="https://novaplaygo.github.io/novaepg/"><i class="fas fa-calendar-alt"></i> Buscador EPG ID</a>
+                    <a href="#" onclick="cerrarSesion(); return false;" class="logout-link"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<main>
+    <div id="auth-view" class="hidden">
+        <div class="auth-card">
+            <h2 style="margin-bottom:30px; font-weight:900; font-size: 28px;">Acceso al Panel</h2>
+            <div class="form-group">
+                <label>Usuario</label>
+                <input type="text" id="username" placeholder="Usuario">
+            </div>
+            <div class="form-group">
+                <label>Contraseña</label>
+                <input type="password" id="password" placeholder="••••••••">
+            </div>
+            <button class="btn-primary" id="loginButton" style="width:100%; justify-content:center; padding: 18px; border-radius: 14px; font-weight: 900;" onclick="iniciarSesion()">ENTRAR AL DASHBOARD</button>
+            <div id="loginStatus" class="status"></div>
+        </div>
+    </div>
+
+    <div class="app-container hidden" id="main-panel">
+        <!-- Live Users Counter -->
+        <div class="live-counter-card">
+            <span class="live-value" id="count-live">0</span>
+            <span class="live-label"><span class="live-dot"></span> DISPOSITIVOS EN VIVO</span>
+        </div>
+
+        <!-- Seguridad Widget -->
+        <div class="card">
+            <h2><i class="fas fa-shield-alt"></i> Seguridad & Accesos</h2>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <span class="value" id="count-users">0</span>
+                    <span class="label">Activos</span>
+                </div>
+                <div class="stat-box">
+                    <span class="value" id="count-blocked" style="color:var(--primary)">0</span>
+                    <span class="label">Bloqueados</span>
+                </div>
+            </div>
+            <div class="info-container">
+                <div class="version-row"><span>Estado del Búnker</span> <span class="tag" style="color:var(--success); background:rgba(16,185,129,0.1)">PROTEGIDO</span></div>
+                <div class="version-row"><span>Alertas Recientes</span> <span class="val" id="count-logs">0</span></div>
+            </div>
+            <a href="https://novaplaygo.github.io/NovaSecurity/" class="btn-launch">
+                <i class="fas fa-external-link-alt"></i> ABRIR SEGURIDAD
+            </a>
+        </div>
+
+        <!-- Canales Widget -->
+        <div class="card">
+            <h2><i class="fas fa-tv"></i> Gestión de Contenidos</h2>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <span class="value" id="count-total-ch">0</span>
+                    <span class="label">Canales</span>
+                </div>
+                <div class="stat-box">
+                    <span class="value" id="count-inactive-ch" style="color:var(--warning)">0</span>
+                    <span class="label">En Mant.</span>
+                </div>
+            </div>
+            <div class="info-container">
+                <div class="version-row"><span>Fuente Principal</span> <span class="val">novaplay.json</span></div>
+                <div class="version-row"><span>Categorías</span> <span class="val" id="count-cats">0</span></div>
+            </div>
+            <a href="https://novaplaygo.github.io/panel-canales/" class="btn-launch">
+                <i class="fas fa-list"></i> GESTIONAR CANALES
+            </a>
+        </div>
+
+        <!-- Aplicaciones Widget -->
+        <div class="card">
+            <h2><i class="fas fa-download"></i> Versiones & APKs</h2>
+            <div class="info-container" style="margin-top: 10px;">
+                <div class="version-row"><span>NovaPlay Estable</span> <span class="tag" id="v-stable">...</span></div>
+                <div class="version-row"><span>NovaPlay Beta</span> <span class="tag" id="v-beta" style="color:var(--primary); background:rgba(229,9,20,0.1)">...</span></div>
+            </div>
+            <p style="font-size: 10px; color:var(--text-muted); margin-bottom: 25px; line-height: 1.4;">* Los datos se sincronizan automáticamente con el repositorio updater.</p>
+            <a href="https://novaplaygo.github.io/NovaApps/" class="btn-launch">
+                <i class="fas fa-store"></i> IR A DESCARGAS
+            </a>
+        </div>
+
+        <div class="card">
+            <h2><i class="fas fa-pie-chart"></i> Distribución de Versiones</h2>
+            <div id="version-summary-container" class="version-summary-list">
+                <!-- Se llena dinámicamente -->
+            </div>
+            <div class="chart-container">
+                <canvas id="versionsChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2><i class="fas fa-server"></i> Salud del Sistema</h2>
+            <div class="health-list">
+                <div class="health-item">
+                    <span class="health-label"><i class="fas fa-cloud"></i> Supabase Cloud</span>
+                    <span id="health-supabase" class="health-status status-warn">Verificando...</span>
+                </div>
+                <div class="health-item">
+                    <span class="health-label"><i class="fab fa-github"></i> GitHub API</span>
+                    <span id="health-github" class="health-status status-warn">Verificando...</span>
+                </div>
+                <div class="health-item">
+                    <span class="health-label"><i class="fas fa-file-code"></i> Sincronización JSON</span>
+                    <span id="health-json" class="health-status status-warn">Esperando...</span>
+                </div>
+                <div class="health-item">
+                    <span class="health-label"><i class="fas fa-exclamation-triangle"></i> Último Reporte App</span>
+                    <span id="health-last-error" class="health-status">...</span>
+                </div>
+            </div>
+            <button class="btn-launch" style="background: rgba(255,255,255,0.02); color: #fff; border: 1px solid var(--border);" onclick="checkHealth()">
+                <i class="fas fa-sync-alt"></i> REFRESCAR DIAGNÓSTICO
+            </button>
+        </div>
+
+        <!-- Gráficos de Actividad -->
+        <div class="card wide">
+            <h2 style="margin-bottom: 10px;"><i class="fas fa-chart-line"></i> Actividad de Usuarios (24h)</h2>
+            <div class="chart-container">
+                <canvas id="activityChart"></canvas>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div class="nova-modal-overlay" id="novaModal">
+    <div class="nova-modal">
+        <h3 id="novaModalTitle" style="font-weight:900;">Confirmar</h3>
+        <p id="novaModalMessage" style="color: var(--text-muted); margin-bottom: 25px; line-height: 1.5;"></p>
+        <div id="modalInputContainer" class="hidden">
+            <input type="text" id="modalInput" placeholder="...">
+            <select id="modalSelect" class="hidden"></select>
+        </div>
+        <div class="nova-modal-btns">
+            <button class="nova-modal-btn btn-cancel" id="novaModalCancel">CANCELAR</button>
+            <button class="nova-modal-btn btn-confirm" id="novaModalConfirm">ACEPTAR</button>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <div class="footer-text">
+        © 2026 NOVAPLAY TV<br>
+        © 2010 - 2026 - NOVAPLAY TV. TODOS LOS DERECHOS RESERVADOS
+    </div>
+</footer>
+
+<script>
+    const API_URL = "https://mrghnngupolsgatcmevw.supabase.co/functions/v1/actualizar-canales";
+    const CONNECTOR_URL = "https://mrghnngupolsgatcmevw.supabase.co/functions/v1/access_connector";
+    const APP_USER = "novaplay";
+
+    let sessionToken = localStorage.getItem("novaplay_session_token") || "";
+    let maintenanceEnabled = false;
+    let charts = {};
+
+    async function fetchSafeData(action, isBeta = false) {
+        try {
+            // Handshake para obtener credenciales
+            const authRes = await fetch(CONNECTOR_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: "obtener_credenciales", usuario: APP_USER })
+            });
+            const credentials = await authRes.json();
+            const authHeader = "Basic " + btoa(`${APP_USER}:${credentials.password}`);
+
+            // Obtener datos reales
+            const dataRes = await fetch(CONNECTOR_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': authHeader
+                },
+                body: JSON.stringify({ action: action, beta: isBeta })
+            });
+            return await dataRes.json();
+        } catch (e) {
+            console.error("Error en conexión segura:", e);
+            return null;
+        }
+    }
+
+    function initCharts(activityData, versionData) {
+        const ctxActivity = document.getElementById('activityChart').getContext('2d');
+        const ctxVersions = document.getElementById('versionsChart').getContext('2d');
+        const summaryContainer = document.getElementById('version-summary-container');
+
+        if (charts.activity) charts.activity.destroy();
+        if (charts.versions) charts.versions.destroy();
+
+        // Llenar resumen de texto arriba de la torta
+        if (summaryContainer) {
+            summaryContainer.innerHTML = versionData.labels.map((label, i) => {
+                return `<div class="v-item">${label}: <b>${versionData.values[i]}</b></div>`;
+            }).join('');
+        }
+
+        // 1. Gráfico de Actividad (Barra)
+        charts.activity = new Chart(ctxActivity, {
+            type: 'line',
+            data: {
+                labels: activityData.labels,
+                datasets: [{
+                    label: 'Conexiones',
+                    data: activityData.values,
+                    borderColor: '#e50914',
+                    backgroundColor: 'rgba(229, 9, 20, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, border: { display: false } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        // 2. Gráfico de Versiones (Pie)
+        charts.versions = new Chart(ctxVersions, {
+            type: 'doughnut',
+            plugins: [ChartDataLabels],
+            data: {
+                labels: versionData.labels,
+                datasets: [{
+                    data: versionData.values,
+                    backgroundColor: [
+                        '#e50914', '#10b981', '#3b82f6', '#ffbb00', '#8b5cf6',
+                        '#ec4899', '#f97316', '#06b6d4', '#64748b', '#a855f7', '#22d3ee'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#11151f',
+                    hoverOffset: 30,
+                    offset: versionData.labels.map(() => 0)
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: { padding: 30 },
+                plugins: {
+                    legend: { display: false },
+                    datalabels: {
+                        display: (context) => {
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const perc = (context.dataset.data[context.dataIndex] / total) * 100;
+                            return perc > 4;
+                        },
+                        labels: {
+                            version: {
+                                color: '#fff',
+                                anchor: 'end',
+                                align: 'end',
+                                offset: 12,
+                                font: { size: 10, weight: '900' },
+                                formatter: (value, context) => context.chart.data.labels[context.dataIndex]
+                            },
+                            percentage: {
+                                color: '#fff',
+                                anchor: 'center',
+                                align: 'center',
+                                font: { size: 11, weight: '900' },
+                                formatter: (value, context) => {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    return Math.round((value / total) * 100) + '%';
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0,0,0,0.8)',
+                        titleFont: { size: 14, weight: 'bold' },
+                        padding: 12,
+                        cornerRadius: 10
+                    }
+                },
+                cutout: '60%',
+                onClick: (evt, elements, chart) => {
+                    if (elements.length > 0) {
+                        const index = elements[0].index;
+                        const dataset = chart.data.datasets[0];
+                        const currentOffset = dataset.offset[index];
+
+                        // Reset all
+                        dataset.offset = dataset.data.map(() => 0);
+                        // Toggle selected
+                        dataset.offset[index] = currentOffset === 0 ? 25 : 0;
+
+                        chart.update();
+                    }
+                }
+            }
+        });
+    }
+
+    function novaToast(message, type = 'success') {
+        const toast = document.createElement("div");
+        toast.style.cssText = `position:fixed; bottom:20px; right:20px; background:${type === 'success' ? '#10b981' : '#ef4444'}; color:white; padding:15px 25px; border-radius:12px; font-weight:800; z-index:20000; animation: toast-in 0.4s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.5);`;
+        toast.textContent = (type === 'success' ? "✅ " : "❌ ") + message;
+        document.body.appendChild(toast);
+        setTimeout(() => {
+            toast.style.opacity = "0";
+            toast.style.transform = "translateX(20px)";
+            toast.style.transition = "0.3s";
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+    async function req(body) {
+        const h = { "Content-Type": "application/json" };
+        if (sessionToken) h.Authorization = "Bearer " + sessionToken;
+        try {
+            const r = await fetch(API_URL, { method: "POST", headers: h, body: JSON.stringify(body) });
+            const d = await r.json();
+            if (r.status === 401) cerrarSesion();
+            return d;
+        } catch (e) { return { error: "Red" }; }
+    }
+
+    function UI_MostrarPanel() {
+        document.getElementById("auth-view").classList.add("hidden");
+        document.getElementById("main-panel").classList.remove("hidden");
+        document.getElementById("navLogin").style.display = 'none';
+        document.getElementById("adminMenu").style.display = 'flex';
+        document.getElementById("nav-maint-btn").style.display = 'flex';
+    }
+
+    function UI_MostrarLogin() {
+        document.getElementById("auth-view").classList.remove("hidden");
+        document.getElementById("main-panel").classList.add("hidden");
+        document.getElementById("navLogin").style.display = 'block';
+        document.getElementById("adminMenu").style.display = 'none';
+        document.getElementById("nav-maint-btn").style.display = 'none';
+    }
+
+    async function iniciarSesion() {
+        const u = document.getElementById("username").value.trim();
+        const p = document.getElementById("password").value.trim();
+        const btn = document.getElementById("loginButton");
+        if (!u || !p) return;
+        btn.disabled = true; btn.innerText = "VERIFICANDO...";
+
+        const res = await req({ action: "login", username: u, password: p });
+        if (res.token) {
+            sessionToken = res.token;
+            localStorage.setItem("novaplay_session_token", res.token);
+            location.reload();
+        } else {
+            const el = document.getElementById("loginStatus");
+            el.className = "status error";
+            el.textContent = "Acceso denegado.";
+            el.style.display = "block";
+            btn.disabled = false;
+            btn.textContent = 'ENTRAR AL DASHBOARD';
+        }
+    }
+
+    /* NovaModal Premium */
+    function openModal(title, msg, onConfirm, type = "confirm", options = [], defaultValue = "") {
+        const m = document.getElementById("novaModal");
+        if (!m) return;
+        document.getElementById("novaModalTitle").innerText = title;
+        document.getElementById("novaModalMessage").innerText = msg;
+        const inputContainer = document.getElementById("modalInputContainer");
+        const input = document.getElementById("modalInput");
+        const select = document.getElementById("modalSelect");
+
+        if (inputContainer) inputContainer.classList.add("hidden");
+        if (input) input.classList.add("hidden");
+        if (select) select.classList.add("hidden");
+
+        if (type === "prompt") {
+            if (inputContainer) inputContainer.classList.remove("hidden");
+            if (input) {
+                input.classList.remove("hidden");
+                input.value = defaultValue;
+                setTimeout(() => input.focus(), 100);
+            }
+        } else if (type === "select") {
+            if (inputContainer) inputContainer.classList.remove("hidden");
+            if (select) {
+                select.classList.remove("hidden");
+                select.innerHTML = options.map(o => `<option value="${o.value}">${o.text}</option>`).join('');
+                setTimeout(() => select.focus(), 100);
+            }
+        }
+
+        m.style.display = "flex";
+
+        const close = () => { m.style.display = "none"; };
+        document.getElementById("novaModalCancel").onclick = close;
+        document.getElementById("novaModalConfirm").onclick = () => {
+            if (type === "prompt") onConfirm(input.value);
+            else if (type === "select") onConfirm(select.value);
+            else onConfirm();
+            close();
+        };
+    }
+
+    function cerrarSesion() {
+        openModal("Cerrar Sesión", "¿Estás seguro que deseas salir del Dashboard?", () => {
+            localStorage.removeItem("novaplay_session_token");
+            location.reload();
+        });
+    }
+
+    async function loadSummary() {
+        if (!sessionToken) return;
+
+        // 0. Estado de Mantenimiento
+        loadMaintenanceStatus();
+
+        // 1. Resumen de Seguridad
+        const users = await req({ action: "seguridad_listar_usuarios" });
+        const black = await req({ action: "seguridad_listar_blacklist" });
+        const logs = await req({ action: "listar_logs" });
+
+        // 2. Resumen de Canales
+        const channelsData = await req({ action: "obtener_json" });
+        if (channelsData && channelsData.json) {
+            let total = 0, inactive = 0;
+            channelsData.json.forEach(cat => {
+                total += (cat.items || []).length;
+                cat.items.forEach(ch => { if (String(ch.status) === 'false') inactive++; });
+            });
+            document.getElementById('count-total-ch').innerText = total;
+            document.getElementById('count-inactive-ch').innerText = inactive;
+            document.getElementById('count-cats').innerText = channelsData.json.length;
+        }
+
+        // Ejecutar diagnóstico de salud (ahora que los datos de canales están listos)
+        checkHealth();
+
+        if (users) {
+            document.getElementById('count-users').innerText = users.length || 0;
+
+            // Procesar datos para gráficos y contador Live
+            const versionCounts = {};
+            const activityHours = new Array(24).fill(0);
+            const now = new Date();
+            let liveCount = 0;
+
+            users.forEach(u => {
+                // Versiones
+                const v = u.version_app || "Desconocida";
+                versionCounts[v] = (versionCounts[v] || 0) + 1;
+
+                // Detección "En Vivo" (Señal en los últimos 5 minutos)
+                if (u.fecha_actualizacion) {
+                    const date = new Date(u.fecha_actualizacion);
+                    const diffMs = now - date;
+
+                    // Contar si hubo señal hace menos de 5 min
+                    if (Math.floor(diffMs / (1000 * 60)) < 5) liveCount++;
+
+                    // Actividad 24h
+                    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+                    if (diffHours < 24) {
+                        activityHours[23 - diffHours]++;
+                    }
+                }
+            });
+
+            document.getElementById('count-live').innerText = liveCount;
+
+            const actLabels = Array.from({length: 24}, (_, i) => `${i}h`);
+            initCharts(
+                { labels: actLabels, values: activityHours },
+                { labels: Object.keys(versionCounts), values: Object.values(versionCounts) }
+            );
+        }
+
+        if (black) document.getElementById('count-blocked').innerText = black.length || 0;
+        if (logs) document.getElementById('count-logs').innerText = logs.length || 0;
+
+        // 3. Resumen de Apps via NovaConnect
+        const [dataApps, betaApps] = await Promise.all([
+            fetchSafeData("obtener_actualizacion", false),
+            fetchSafeData("obtener_actualizacion", true)
+        ]);
+
+        if (dataApps) {
+            document.getElementById('v-stable').innerText = "v" + dataApps.version;
+        }
+        if (betaApps) {
+            document.getElementById('v-beta').innerText = "v" + betaApps.version;
+        }
+    }
+
+    async function loadMaintenanceStatus() {
+        const res = await fetchSafeData("obtener_mantenimiento");
+        if (res) {
+            maintenanceEnabled = res.success;
+            updateMaintenanceUI();
+        }
+    }
+
+    function updateMaintenanceUI() {
+        const btn = document.getElementById('nav-maint-btn');
+        const text = document.getElementById('nav-maint-text');
+
+        if (maintenanceEnabled) {
+            text.innerText = "MANTENIMIENTO: ON";
+            btn.className = "btn-maint-nav on";
+        } else {
+            text.innerText = "SISTEMA: OK";
+            btn.className = "btn-maint-nav off";
+        }
+    }
+
+    async function checkHealth() {
+        const setStatus = (id, status, text) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.className = `health-status status-${status}`;
+            el.innerText = text;
+        };
+
+        // 1. Check Supabase (Via Edge Function)
+        try {
+            const start = Date.now();
+            const res = await fetchSafeData("obtener_mantenimiento");
+            const lat = Date.now() - start;
+            if (res) setStatus('health-supabase', 'ok', `ONLINE (${lat}ms)`);
+            else setStatus('health-supabase', 'err', 'ERROR API');
+        } catch(e) { setStatus('health-supabase', 'err', 'OFFLINE'); }
+
+        // 2. Check GitHub (Zen API - No Auth required for simple ping)
+        try {
+            const res = await fetch("https://api.github.com/zen");
+            if (res.ok) setStatus('health-github', 'ok', 'CONECTADO');
+            else setStatus('health-github', 'err', 'BLOQUEADO');
+        } catch(e) { setStatus('health-github', 'err', 'ERROR RED'); }
+
+        // 3. Check JSON (Check if already loaded in summary)
+        const totalChannels = document.getElementById('count-total-ch').innerText;
+        if (totalChannels !== "0") setStatus('health-json', 'ok', 'SINCRONIZADO');
+        else setStatus('health-json', 'err', 'ERROR LECTURA');
+
+        // 4. Last App Report (Search for the newest log)
+        try {
+            const logs = await req({ action: "listar_logs" });
+            if (logs && logs.length > 0) {
+                // Supabase storage returns created_at
+                const latest = logs[0];
+                const date = new Date(latest.created_at);
+                const diff = Math.floor((new Date() - date) / (1000 * 60)); // minutos
+
+                let timeStr = "";
+                if (diff < 60) timeStr = `HACE ${diff}m`;
+                else if (diff < 1440) timeStr = `HACE ${Math.floor(diff/60)}h`;
+                else timeStr = `HACE ${Math.floor(diff/1440)}d`;
+
+                setStatus('health-last-error', (diff < 60 ? 'err' : 'ok'), timeStr);
+            } else {
+                setStatus('health-last-error', 'ok', 'SIN ALERTAS');
+            }
+        } catch(e) { setStatus('health-last-error', 'warn', 'SIN DATOS'); }
+    }
+
+    function confirmarToggleMantenimiento() {
+        const accion = maintenanceEnabled ? "DESACTIVAR" : "ACTIVAR";
+        const msg = `¿Estás seguro que deseas ${accion} el Modo Mantenimiento?\n\n${maintenanceEnabled ? "Los usuarios podrán entrar a la app." : "Se bloqueará el acceso a todos los usuarios."}`;
+
+        openModal("Confirmar Estado", msg, async () => {
+            const btn = document.getElementById('nav-maint-btn');
+            const span = document.getElementById('nav-maint-text');
+            btn.disabled = true;
+            const originalText = span.innerText;
+            span.innerText = "PROCESANDO...";
+
+            const newStatus = {
+                success: !maintenanceEnabled,
+                title: "Servidor en Mantenimiento",
+                text: "Estamos realizando cambios en el servidor o estamos ajustando cambios para una actualización de la app. Disculpe los inconvenientes"
+            };
+
+            const res = await req({
+                action: "guardar_mantenimiento",
+                content: JSON.stringify(newStatus, null, 2)
+            });
+
+            if (res && res.success) {
+                maintenanceEnabled = !maintenanceEnabled;
+                updateMaintenanceUI();
+                novaToast("Estado actualizado correctamente", "success");
+            } else {
+                novaToast("Error al actualizar estado", "error");
+                span.innerText = originalText;
+            }
+            btn.disabled = false;
+        });
+    }
+
+    // Toggle Menú Móvil
+    const navToggle = document.getElementById('navToggle');
+    const navLinks = document.getElementById('navLinks');
+    const adminMenu = document.getElementById('adminMenu');
+    const btnAdmin = document.querySelector('.btn-admin');
+
+    if (navToggle) {
+        navToggle.addEventListener('click', () => {
+            navToggle.classList.toggle('active');
+            navLinks.classList.toggle('active');
+        });
+    }
+
+    // Toggle Dropdown (Mobile & Desktop)
+    if (btnAdmin) {
+        btnAdmin.addEventListener('click', (e) => {
+            e.stopPropagation();
+            adminMenu.classList.toggle('active');
+        });
+    }
+
+    // Cerrar menú al clickear fuera
+    document.addEventListener('click', (e) => {
+        if (adminMenu && !adminMenu.contains(e.target)) {
+            adminMenu.classList.remove('active');
+        }
+    });
+
+    // Cerrar menú al clickear link
+    document.querySelectorAll('.dropdown-content a').forEach(link => {
+        link.addEventListener('click', () => {
+            adminMenu.classList.remove('active');
+        });
+    });
+
+    // Cerrar menú al clickear link (móvil)
+    document.querySelectorAll('.nav-links a').forEach(link => {
+        link.addEventListener('click', () => {
+            if (navToggle) navToggle.classList.remove('active');
+            if (navLinks) navLinks.classList.remove('active');
+        });
+    });
+
+    document.getElementById("password").addEventListener("keydown", e => { if (e.key === "Enter") iniciarSesion(); });
+
+    if (sessionToken) UI_MostrarPanel(), loadSummary();
+    else UI_MostrarLogin();
+</script>
+</body>
+</html>
