@@ -344,6 +344,7 @@
             <div class="info-container" style="margin-top: 10px;">
                 <div class="version-row"><span>NovaPlay Estable</span> <span class="tag" id="v-stable">...</span></div>
                 <div class="version-row"><span>NovaPlay Beta</span> <span class="tag" id="v-beta" style="color:var(--primary); background:rgba(229,9,20,0.1)">...</span></div>
+                <div class="version-row"><span>KillerPlay</span> <span class="tag" id="v-killer" style="color:#10b981; background:rgba(16,185,129,0.1)">...</span></div>
             </div>
             <p style="font-size: 10px; color:var(--text-muted); margin-bottom: 25px; line-height: 1.4;">* Los datos se sincronizan automáticamente con el repositorio updater.</p>
             <a href="https://novaplaygo.github.io/NovaApps/" class="btn-launch">
@@ -763,6 +764,19 @@
         }
         if (betaApps) {
             document.getElementById('v-beta').innerText = "v" + betaApps.version;
+        }
+
+        try {
+            const killerRes = await fetch("https://raw.githubusercontent.com/NovaplayGO/updater/main/json/ms_aux/updateplay.json");
+            if (killerRes.ok) {
+                const killerData = await killerRes.json();
+                if (killerData && killerData.version) {
+                    const el = document.getElementById('v-killer');
+                    if (el) el.innerText = "v" + killerData.version;
+                }
+            }
+        } catch(e) {
+            console.warn("No se pudo cargar KillerPlay:", e);
         }
     }
 
