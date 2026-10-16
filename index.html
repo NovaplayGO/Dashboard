@@ -258,7 +258,7 @@
                     <a href="https://novaplaygo.github.io/Dashboard/"><i class="fas fa-chart-line"></i> Dashboard Central</a>
                     <a href="https://novaplaygo.github.io/panel-canales/"><i class="fas fa-tv"></i> Admin. Canales</a>
                     <a href="https://novaplaygo.github.io/NovaSecurity/"><i class="fas fa-shield-alt"></i> NovaSecurity</a>
-                    <a href="https://novaplaygo.github.io/constructor/"><i class="fas fa-hammer"></i> Constructor</a>
+                    <a href="https://novaplaygo.github.io/constructor/"><i class="fas fa-tools"></i> Constructor</a>
 
                     <a href="https://novaplaygo.github.io/novaimg/actualizar-icono/"><i class="fas fa-icons"></i> Gestión de Iconos</a>
                     <a href="https://novaplaygo.github.io/novaimg/generador/"><i class="fas fa-magic"></i> Icon Studio</a>
@@ -536,29 +536,29 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                layout: { padding: 30 },
+                layout: { padding: 45 },
                 plugins: {
                     legend: { display: false },
                     datalabels: {
                         display: (context) => {
                             const total = context.dataset.data.reduce((a, b) => a + b, 0);
                             const perc = (context.dataset.data[context.dataIndex] / total) * 100;
-                            return perc > 4;
+                            return perc > 3;
                         },
                         labels: {
                             version: {
                                 color: '#fff',
                                 anchor: 'end',
                                 align: 'end',
-                                offset: 12,
-                                font: { size: 10, weight: '900' },
+                                offset: 15,
+                                font: { size: 9, weight: '800' },
                                 formatter: (value, context) => context.chart.data.labels[context.dataIndex]
                             },
                             percentage: {
                                 color: '#fff',
                                 anchor: 'center',
                                 align: 'center',
-                                font: { size: 11, weight: '900' },
+                                font: { size: 10, weight: '800' },
                                 formatter: (value, context) => {
                                     const total = context.dataset.data.reduce((a, b) => a + b, 0);
                                     return Math.round((value / total) * 100) + '%';
@@ -612,29 +612,29 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                layout: { padding: 30 },
+                layout: { padding: 45 },
                 plugins: {
                     legend: { display: false },
                     datalabels: {
                         display: (context) => {
                             const total = context.dataset.data.reduce((a, b) => a + b, 0);
                             const perc = (context.dataset.data[context.dataIndex] / total) * 100;
-                            return perc > 4;
+                            return perc > 3;
                         },
                         labels: {
                             version: {
                                 color: '#fff',
                                 anchor: 'end',
                                 align: 'end',
-                                offset: 12,
-                                font: { size: 10, weight: '900' },
+                                offset: 15,
+                                font: { size: 9, weight: '800' },
                                 formatter: (value, context) => context.chart.data.labels[context.dataIndex]
                             },
                             percentage: {
                                 color: '#fff',
                                 anchor: 'center',
                                 align: 'center',
-                                font: { size: 11, weight: '900' },
+                                font: { size: 10, weight: '800' },
                                 formatter: (value, context) => {
                                     const total = context.dataset.data.reduce((a, b) => a + b, 0);
                                     return Math.round((value / total) * 100) + '%';
