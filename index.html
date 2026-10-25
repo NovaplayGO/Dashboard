@@ -779,11 +779,25 @@
         });
     }
 
+    async function loadLiveCount() {
+        try {
+            const res = await fetch("https://novaplay-tracker.serv-tecniconovaplay.workers.dev/count");
+            const data = await res.json();
+            if (data && typeof data.active_users !== 'undefined') {
+                document.getElementById('count-live').innerText = data.active_users;
+            }
+        } catch (e) {
+            console.warn("No se pudo cargar el contador en vivo:", e);
+        }
+    }
+
     async function loadSummary() {
         if (!sessionToken) return;
 
-        // 0. Estado de Mantenimiento
+        // 0. Estado de Mantenimiento y Live Count de Cloudflare
         loadMaintenanceStatus();
+        loadLiveCount();
+        setInterval(loadLiveCount, 15000);
 
         // 1. Resumen de Seguridad
         const users = await req({ action: "seguridad_listar_usuarios" });
