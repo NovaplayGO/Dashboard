@@ -146,6 +146,7 @@
         .live-counter-card { grid-column: 1 / -1; background: linear-gradient(135deg, #11151f 0%, #080a10 100%); border: 1px solid var(--border); border-radius: 30px; padding: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.6); }
         .live-counter-card::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(229,9,20,0.05) 0%, transparent 70%); pointer-events: none; }
         .live-value { font-size: 80px; font-weight: 900; color: #fff; line-height: 1; letter-spacing: -4px; text-shadow: 0 0 40px rgba(229,9,20,0.6); animation: pulse-glow 2s infinite; }
+        .live-value.loading { font-size: 26px; color: var(--text-muted); font-weight: 600; text-shadow: none; animation: none; }
         .live-label { font-size: 14px; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 4px; margin-top: 10px; display: flex; align-items: center; gap: 10px; }
         .live-dot { width: 10px; height: 10px; background: var(--primary); border-radius: 50%; box-shadow: 0 0 15px var(--primary); animation: blink 1s infinite; }
 
@@ -290,7 +291,7 @@
     <div class="app-container hidden" id="main-panel">
         <!-- Live Users Counter -->
         <div class="live-counter-card">
-            <span class="live-value" id="count-live">0</span>
+            <span class="live-value loading" id="count-live">Conectando...</span>
             <span class="live-label"><span class="live-dot"></span> DISPOSITIVOS EN VIVO</span>
         </div>
 
@@ -780,14 +781,22 @@
     }
 
     async function loadLiveCount() {
+        const el = document.getElementById('count-live');
         try {
-            const res = await fetch("https://novaplay-tracker.serv-tecniconovaplay.workers.dev/count");
+            const res = await fetch("https://novaplay-tracker.serv-tecniconovaplay.workers.dev/count", { cache: "no-store" });
             const data = await res.json();
             if (data && typeof data.active_users !== 'undefined') {
-                document.getElementById('count-live').innerText = data.active_users;
+                el.innerText = data.active_users;
+                el.classList.remove('loading');
+            } else if (typeof data === 'number') {
+                el.innerText = data;
+                el.classList.remove('loading');
             }
         } catch (e) {
             console.warn("No se pudo cargar el contador en vivo:", e);
+            if (el && el.innerText === "Conectando...") {
+                el.innerText = "Error";
+            }
         }
     }
 
