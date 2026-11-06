@@ -864,8 +864,6 @@
                 }
             });
 
-            document.getElementById('count-live').innerText = liveCount;
-
             const actLabels = Array.from({length: 24}, (_, i) => `${i}h`);
             initCharts(
                 { labels: actLabels, values: activityHours },
