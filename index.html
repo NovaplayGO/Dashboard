@@ -927,17 +927,18 @@
             el.innerText = text;
         };
 
-        // 1. Check Supabase (Via Cloudflare Worker API Gateway)
+        // 1. Check Supabase Cloud (Via REST API endpoint)
         try {
             const start = Date.now();
-            const res = await fetch("https://profiles.novaplaygo2.workers.dev/", {
-                method: "POST",
-                headers: { "Content-Type": "application/json", "User-Agent": "Novaplay - MG Digital", "NP-MG-1996": "1996" },
-                body: JSON.stringify({ action: "panel_get_business_configs" })
+            const res = await fetch("https://qqqpewuumwdrefpfnyvg.supabase.co/rest/v1/", {
+                headers: { "apikey": "sb_publishable_56epBVQKxWC5_OF0O8x0pA_gxDsxMbQ" }
             });
             const lat = Date.now() - start;
-            if (res.ok) setStatus('health-supabase', 'ok', `ONLINE (${lat}ms)`);
-            else setStatus('health-supabase', 'err', 'ERROR API');
+            if (res.ok || res.status === 200 || res.status === 401 || res.status === 403) {
+                setStatus('health-supabase', 'ok', `ONLINE (${lat}ms)`);
+            } else {
+                setStatus('health-supabase', 'err', 'ERROR API');
+            }
         } catch(e) { setStatus('health-supabase', 'err', 'OFFLINE'); }
 
         // 2. Check GitHub (Zen API - No Auth required for simple ping)
