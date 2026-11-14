@@ -927,12 +927,16 @@
             el.innerText = text;
         };
 
-        // 1. Check Supabase (Via Edge Function)
+        // 1. Check Supabase (Via Cloudflare Worker API Gateway)
         try {
             const start = Date.now();
-            const res = await fetchSafeData("obtener_mantenimiento");
+            const res = await fetch("https://profiles.novaplaygo2.workers.dev/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "User-Agent": "Novaplay - MG Digital", "NP-MG-1996": "1996" },
+                body: JSON.stringify({ action: "panel_get_business_configs" })
+            });
             const lat = Date.now() - start;
-            if (res) setStatus('health-supabase', 'ok', `ONLINE (${lat}ms)`);
+            if (res.ok) setStatus('health-supabase', 'ok', `ONLINE (${lat}ms)`);
             else setStatus('health-supabase', 'err', 'ERROR API');
         } catch(e) { setStatus('health-supabase', 'err', 'OFFLINE'); }
 
