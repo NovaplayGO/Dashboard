@@ -927,10 +927,10 @@
             el.innerText = text;
         };
 
-        // 1. Check Supabase Cloud (Direct project URL ping - Zero DB logs)
+        // 1. Check Supabase (Direct ping to supabase.com - Zero DB logs)
         try {
             const start = Date.now();
-            await fetch("https://qqqpewuumwdrefpfnyvg.supabase.co", { method: "HEAD", mode: "no-cors" });
+            await fetch("https://supabase.com", { method: "HEAD", mode: "no-cors" });
             const lat = Date.now() - start;
             setStatus('health-supabase', 'ok', `ONLINE (${lat}ms)`);
         } catch(e) { setStatus('health-supabase', 'err', 'OFFLINE'); }
