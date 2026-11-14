@@ -779,7 +779,10 @@
     async function loadLiveCount() {
         const el = document.getElementById('count-live');
         try {
-            const res = await fetch("https://novaplay-tracker.serv-tecniconovaplay.workers.dev/count", { cache: "no-store" });
+            const res = await fetch("https://novaplay-tracker.serv-tecniconovaplay.workers.dev/count", {
+                headers: { "User-Agent": "Novaplay - MG Digital", "NP-MG-1996": "1996" },
+                cache: "no-store"
+            });
             const data = await res.json();
             if (data && typeof data.active_users !== 'undefined') {
                 el.innerText = data.active_users;
