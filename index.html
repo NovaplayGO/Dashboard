@@ -927,13 +927,12 @@
             el.innerText = text;
         };
 
-        // 1. Check Supabase Cloud (Via Cloudflare Worker Edge - Zero DB logs)
+        // 1. Check Supabase Cloud (Direct project URL ping - Zero DB logs)
         try {
             const start = Date.now();
-            const res = await fetch("https://profiles.novaplaygo2.workers.dev/", { method: "OPTIONS" });
+            await fetch("https://qqqpewuumwdrefpfnyvg.supabase.co", { method: "HEAD", mode: "no-cors" });
             const lat = Date.now() - start;
-            if (res.ok) setStatus('health-supabase', 'ok', `ONLINE (${lat}ms)`);
-            else setStatus('health-supabase', 'err', 'ERROR API');
+            setStatus('health-supabase', 'ok', `ONLINE (${lat}ms)`);
         } catch(e) { setStatus('health-supabase', 'err', 'OFFLINE'); }
 
         // 2. Check GitHub (Zen API - No Auth required for simple ping)
