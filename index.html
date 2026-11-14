@@ -441,27 +441,23 @@
 
     async function fetchSafeData(action, isBeta = false) {
         try {
-            // Handshake para obtener credenciales
-            const authRes = await fetch(CONNECTOR_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: "obtener_credenciales", usuario: APP_USER })
-            });
-            const credentials = await authRes.json();
-            const authHeader = "Basic " + btoa(`${APP_USER}:${credentials.password}`);
-
-            // Obtener datos reales
-            const dataRes = await fetch(CONNECTOR_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': authHeader
-                },
-                body: JSON.stringify({ action: action, beta: isBeta })
-            });
-            return await dataRes.json();
+            let url = "";
+            if (action === "obtener_actualizacion") {
+                url = isBeta ? "https://raw.githubusercontent.com/NovaplayGO/updater/main/json/updatebeta.json" : "https://raw.githubusercontent.com/NovaplayGO/updater/main/json/updatestable.json";
+            } else if (action === "obtener_mantenimiento") {
+                url = "https://raw.githubusercontent.com/NovaplayGO/updater/main/json/mantenimiento.json";
+            } else if (action === "obtener_token") {
+                url = "https://raw.githubusercontent.com/NovaplayGO/updater/main/json/token.json";
+            } else if (action === "obtener_tokentg") {
+                url = "https://raw.githubusercontent.com/NovaplayGO/updater/main/json/tokentg.json";
+            }
+            if (url) {
+                const res = await fetch(url + "?t=" + Date.now());
+                if (res.ok) return await res.json();
+            }
+            return null;
         } catch (e) {
-            console.error("Error en conexión segura:", e);
+            console.error("Error cargando datos:", e);
             return null;
         }
     }
